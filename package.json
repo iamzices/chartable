@@ -1,0 +1,34 @@
+{
+	"name": "@iamzices/chartable",
+	"version": "0.1.0",
+	"description": "Interactive chart and table JavaScript library",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/iamzices/chartable.git"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"jsdelivr": "./dist/index.global.js",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup",
+		"test": "vitest run",
+		"lint": "biome ci && tsc",
+		"format": "biome check --write",
+		"prepublishOnly": "tsup"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15",
+		"tsup": "^8.5.1",
+		"typescript": "~5.9.3",
+		"vitest": "^5.0.5"
+	}
+}

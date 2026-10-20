@@ -2,15 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main]
-    tags: ["v*"]
   pull_request:
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -20,13 +20,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
       - run: npm test
-      - run: npm run build
 
   publish:
-    needs: ci
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'release'
+    needs: [lint, test]
     runs-on: ubuntu-latest
+    environment: npm
     permissions:
       contents: read
       id-token: write
@@ -36,9 +46,5 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - run: test "$GITHUB_REF_NAME" = "v$(node -p 'require("./package.json").version')"
       - run: npm ci
-      # Uses npm trusted publishing (OIDC) once configured; NPM_TOKEN is only needed for the first publish.
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish

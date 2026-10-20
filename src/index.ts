@@ -20,6 +20,7 @@ export interface ChartableSpec {
 
 declare const Plotly: {
 	newPlot(el: HTMLElement, ...figure: readonly unknown[]): Promise<unknown>;
+	Plots: { resize(el: HTMLElement): void };
 };
 declare const Tabulator: new (
 	el: HTMLElement,
@@ -86,16 +87,32 @@ const label = (button: HTMLButtonElement, text: string, icon: string) =>
 let styled = false;
 
 /**
- * Appends a card with the chart or table and its copy and download buttons.
- * Resolves once drawn, and throws if the spec has no columns or rows arrays.
+ * Appends a card with the chart or table and its copy and download buttons to
+ * the container, an element or its id, filling its height or 450px without one.
+ * Resolves once drawn, and throws if the container is missing or the spec has
+ * no columns or rows arrays.
  */
-export async function render(spec: ChartableSpec): Promise<void> {
+export async function render(
+	container: HTMLElement | string,
+	spec: ChartableSpec,
+): Promise<void> {
 	if (
 		!Array.isArray(spec?.columns) ||
 		!Array.isArray(spec.rows) ||
 		!spec.rows.every(Array.isArray)
 	)
 		throw new TypeError("Chartable: spec needs columns and rows arrays");
+	// The usual srcdoc runs its scripts in <head>, before the container exists.
+	if (typeof container === "string" && document.readyState === "loading")
+		await new Promise((r) =>
+			addEventListener("DOMContentLoaded", r, { once: true }),
+		);
+	const el =
+		typeof container === "string"
+			? document.getElementById(container)
+			: container;
+	if (!(el instanceof HTMLElement))
+		throw new TypeError("Chartable: container not found");
 	const { title, kind = "table" } = spec;
 
 	if (!styled) {
@@ -122,15 +139,10 @@ export async function render(spec: ChartableSpec): Promise<void> {
 		label(downloadButton, "Download CSV", DOWNLOAD),
 	);
 	head.append(actions);
-	const body = h("div");
+	const body = h("div", { className: "ct-body" });
 	const card = h("div", { className: "ct" });
 	card.append(head, body);
-	// The usual two-script srcdoc runs in <head>, before <body> exists.
-	if (!document.body)
-		await new Promise((r) =>
-			addEventListener("DOMContentLoaded", r, { once: true }),
-		);
-	document.body.append(card);
+	el.append(card);
 
 	try {
 		if (kind === "table") {
@@ -138,7 +150,8 @@ export async function render(spec: ChartableSpec): Promise<void> {
 				load(`${TABULATOR}/js/tabulator.min.js`),
 				load(`${TABULATOR}/css/tabulator.min.css`),
 			]);
-			const table = new Tabulator(body, {
+			// Tabulator's inline height would override the body's default height.
+			const table = new Tabulator(body.appendChild(h("div")), {
 				// Tabulator reads dots in field names as paths, so fields are indexes.
 				data: spec.rows.map((row) => ({ ...row })),
 				columns: spec.columns.map((name, i) => ({
@@ -147,15 +160,16 @@ export async function render(spec: ChartableSpec): Promise<void> {
 				})),
 				columnDefaults: { titleFormatter: "plaintext" },
 				layout: "fitDataStretch",
-				maxHeight: "384px",
+				height: "100%",
 				placeholder: "No data",
 			});
 			await new Promise<void>((r) => table.on("tableBuilt", r));
 		} else {
 			const fig = figure(spec, kind);
 			await load(PLOTLY);
-			body.className = "ct-chart";
 			await Plotly.newPlot(body, ...fig);
+			// Plotly's responsive option only follows window resizes.
+			new ResizeObserver(() => Plotly.Plots.resize(body)).observe(body);
 		}
 	} catch (e) {
 		body.textContent = (e as Error).message;

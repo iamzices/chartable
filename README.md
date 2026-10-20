@@ -24,15 +24,16 @@ npm i @iamzices/chartable
 ```js
 import { render } from "@iamzices/chartable";
 
-render({ kind: "bar", columns: ["month", "sales"], rows: [["Jan", 12], ["Feb", 9]] });
+render("sales", { kind: "bar", columns: ["month", "sales"], rows: [["Jan", 12], ["Feb", 9]] });
 ```
 
 ## Load via script tag
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@iamzices/chartable@0.1.1"></script>
+<div id="visitors"></div>
+<script src="https://cdn.jsdelivr.net/npm/@iamzices/chartable@0.2.0"></script>
 <script>
-  Chartable.render({
+  Chartable.render("visitors", {
     title: "Monthly visitors",
     kind: "line",
     columns: ["month", "Desktop", "Mobile"],
@@ -47,7 +48,9 @@ render({ kind: "bar", columns: ["month", "sales"], rows: [["Jan", 12], ["Feb", 9
 
 ## API
 
-### `render(spec)`
+### `render(container, spec)`
+
+`spec` fields:
 
 | Field     | Description                                                      |
 | --------- | ---------------------------------------------------------------- |

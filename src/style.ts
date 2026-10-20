@@ -19,8 +19,10 @@ export const COPY = icon(
 export const CHECK = icon('<path d="M20 6 9 17l-5-5"/>');
 
 // Tabulator's CSS is imported into a layer, so these unlayered rules win.
+// The card fills its container's height. Without one, the 344px body makes the
+// card 450px tall.
 export const CSS = `
-.ct{box-sizing:border-box;display:flex;flex-direction:column;gap:24px;padding:24px;border:1px solid ${BORDER};border-radius:14px;background:${BG};color:${FG};font:14px/1.5 ${FONT};box-shadow:0 1px 3px 0 rgb(0 0 0/.1),0 1px 2px -1px rgb(0 0 0/.1)}
+.ct{box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:24px;padding:24px;border:1px solid ${BORDER};border-radius:14px;background:${BG};color:${FG};font:14px/1.5 ${FONT};box-shadow:0 1px 3px 0 rgb(0 0 0/.1),0 1px 2px -1px rgb(0 0 0/.1)}
 .ct-head{display:flex;align-items:center;gap:16px}
 .ct h2{margin:0;font-size:16px;font-weight:600;line-height:1}
 .ct-actions{display:flex;gap:8px;margin-left:auto}
@@ -28,7 +30,7 @@ export const CSS = `
 .ct button:hover{background:${MUTED}}
 .ct button:focus-visible{border-color:${RING};box-shadow:0 0 0 3px ${RING}80}
 .ct button svg{width:16px;height:16px}
-.ct-chart{height:320px}
+.ct-body{flex:auto;height:344px;min-height:0}
 .ct .tabulator{border:0;background:none;font-size:14px}
 .ct .tabulator-header{border-bottom:1px solid ${BORDER};background:none;color:${FG};font-weight:500}
 .ct .tabulator-header .tabulator-col{border-right:0;background:none}

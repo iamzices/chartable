@@ -17,6 +17,7 @@ export const COPY = icon(
 	'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
 );
 export const CHECK = icon('<path d="M20 6 9 17l-5-5"/>');
+export const CROSS = icon('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
 
 // Tabulator's CSS is imported into a layer, so these unlayered rules win.
 // The card fills its container's height. Without one, the 344px body makes the

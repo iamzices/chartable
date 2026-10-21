@@ -1,6 +1,6 @@
 import { figure } from "./chart";
 import { toCsv } from "./csv";
-import { CHECK, COPY, CSS, DOWNLOAD } from "./style";
+import { CHECK, COPY, CROSS, CSS, DOWNLOAD } from "./style";
 
 export type Cell = string | number | boolean | null;
 
@@ -69,6 +69,7 @@ function download(spec: ChartableSpec) {
 async function copy(text: string) {
 	try {
 		await navigator.clipboard.writeText(text);
+		return true;
 	} catch {
 		// Sandboxed iframes usually lack the clipboard-write permission.
 		const focused = document.activeElement as HTMLElement | null;
@@ -81,7 +82,7 @@ async function copy(text: string) {
 		const copied = document.execCommand("copy");
 		area.remove();
 		focused?.focus();
-		if (!copied) throw new Error("Chartable: copy failed");
+		return copied;
 	}
 }
 
@@ -128,8 +129,8 @@ export async function render(
 	const copyButton = h("button", {
 		type: "button",
 		onclick: async () => {
-			await copy(toCsv(spec, "\t"));
-			label(copyButton, "Copied", CHECK);
+			if (await copy(toCsv(spec, "\t"))) label(copyButton, "Copied", CHECK);
+			else label(copyButton, "Copy failed", CROSS);
 			setTimeout(() => label(copyButton, "Copy data", COPY), 2000);
 		},
 	});

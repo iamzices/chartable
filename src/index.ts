@@ -46,7 +46,11 @@ function load(url: string) {
 			: h("script", { src: url });
 		loaded = new Promise((resolve, reject) => {
 			el.onload = resolve;
-			el.onerror = () => reject(new Error(`Chartable: failed to load ${url}`));
+			el.onerror = () => {
+				loads.delete(url);
+				el.remove();
+				reject(new Error(`Chartable: failed to load ${url}`));
+			};
 		});
 		document.head.append(el);
 		loads.set(url, loaded);

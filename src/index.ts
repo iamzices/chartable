@@ -169,7 +169,9 @@ export async function render(
 			await load(PLOTLY);
 			await Plotly.newPlot(body, ...fig);
 			// Plotly's responsive option only follows window resizes.
-			new ResizeObserver(() => Plotly.Plots.resize(body)).observe(body);
+			new ResizeObserver(
+				() => body.isConnected && Plotly.Plots.resize(body),
+			).observe(body);
 		}
 	} catch (e) {
 		body.textContent = (e as Error).message;

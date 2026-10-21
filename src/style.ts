@@ -26,9 +26,9 @@ export const CSS = `
 .ct-head{display:flex;align-items:center;gap:16px}
 .ct h2{margin:0;font-size:16px;font-weight:600;line-height:1}
 .ct-actions{display:flex;gap:8px;margin-left:auto}
-.ct button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid ${BORDER};border-radius:8px;background:${BG};color:${FG};cursor:pointer;outline:none;box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
+.ct button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid ${BORDER};border-radius:8px;background:${BG};color:${FG};cursor:pointer;box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
 .ct button:hover{background:${MUTED}}
-.ct button:focus-visible{border-color:${RING};box-shadow:0 0 0 3px ${RING}80}
+.ct button:focus-visible{outline:2px solid transparent;border-color:${RING};box-shadow:0 0 0 3px ${RING}80}
 .ct button svg{width:16px;height:16px}
 .ct-body{flex:auto;height:344px;min-height:0}
 .ct .tabulator{border:0;background:none;font-size:14px}

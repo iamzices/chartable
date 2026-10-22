@@ -16,7 +16,7 @@ test("makes one trace per series sharing column 0 as x", () => {
 	expect(data).toMatchObject([
 		{
 			type: "scatter",
-			mode: "lines",
+			mode: "lines+markers",
 			connectgaps: true,
 			name: "Desktop",
 			x: ["Jan", "Feb", "Mar"],

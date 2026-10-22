@@ -9,8 +9,9 @@ const text = <T extends Cell>(v: T) =>
 
 const LINE = {
 	type: "scatter",
-	mode: "lines",
+	mode: "lines+markers",
 	connectgaps: true,
+	cliponaxis: false,
 	line: { width: 2 },
 };
 const TRACES = {

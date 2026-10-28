@@ -26,7 +26,7 @@ export const CROSS = icon('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
 // card 450px tall.
 export const CSS = `
 @layer tabulator{${TABULATOR}}
-.ct{box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:24px;padding:24px;border:1px solid ${BORDER};border-radius:14px;background:${BG};color:${FG};font:14px/1.5 ${FONT};box-shadow:0 1px 3px 0 rgb(0 0 0/.1),0 1px 2px -1px rgb(0 0 0/.1)}
+.ct{box-sizing:border-box;height:100%;margin:0;display:flex;flex-direction:column;gap:24px;padding:24px;border:1px solid ${BORDER};border-radius:14px;background:${BG};color:${FG};font:14px/1.5 ${FONT};box-shadow:0 1px 3px 0 rgb(0 0 0/.1),0 1px 2px -1px rgb(0 0 0/.1)}
 .ct-head{display:flex;align-items:center;gap:16px}
 .ct h2{margin:0;font-size:16px;font-weight:600;line-height:1}
 .ct-actions{display:flex;gap:8px;margin-left:auto}

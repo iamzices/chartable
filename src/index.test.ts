@@ -55,6 +55,7 @@ test("rejects a missing container", async () => {
 test("draws a chart into a card", async () => {
 	await render("c", chart);
 	expect(document.querySelector("#c .ct h2")?.textContent).toBe("Visits");
+	expect(document.querySelector("figure.ct")?.ariaLabel).toBe("Visits");
 	expect(Plotly.newPlot).toHaveBeenCalledWith(
 		document.querySelector(".ct-body"),
 		[expect.objectContaining({ type: "bar", x: ["Jan"], y: [1] })],
@@ -65,6 +66,9 @@ test("draws a chart into a card", async () => {
 
 test("draws a table with column indexes as fields", async () => {
 	await render("c", spec);
+	expect(document.querySelector("figure.ct")?.hasAttribute("aria-label")).toBe(
+		false,
+	);
 	expect(Tabulator).toHaveBeenCalledWith(
 		expect.any(HTMLElement),
 		expect.objectContaining({

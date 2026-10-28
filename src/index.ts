@@ -117,7 +117,7 @@ export async function render(
 	);
 	head.append(actions);
 	const body = h("div", { className: "ct-body" });
-	const card = h("div", { className: "ct" });
+	const card = h("figure", { className: "ct", ariaLabel: title ?? null });
 	card.append(head, body);
 	el.append(card);
 

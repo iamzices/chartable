@@ -72,7 +72,6 @@ export function figure({ columns, rows }: ChartableSpec, kind: string) {
 		barcornerradius: 4,
 	};
 	const config = {
-		responsive: true,
 		displaylogo: false,
 		modeBarButtonsToRemove: ["toImage"],
 	};

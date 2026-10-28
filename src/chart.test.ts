@@ -88,3 +88,7 @@ test("rejects unknown kinds, including prototype keys", () => {
 	);
 	expect(() => figure(visitors, "toString")).toThrow("Chartable: unknown kind");
 });
+
+test("leaves resizing to the caller instead of a window listener", () => {
+	expect(figure(visitors, "line")[2]).not.toHaveProperty("responsive");
+});

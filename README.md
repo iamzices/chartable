@@ -32,7 +32,7 @@ render("sales", { kind: "bar", columns: ["month", "sales"], rows: [["Jan", 12], 
 
 ```html
 <div id="visitors"></div>
-<script src="https://cdn.jsdelivr.net/npm/@iamzices/chartable@0.3.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@iamzices/chartable"></script>
 <script>
   Chartable.render("visitors", {
     title: "Monthly visitors",

@@ -30,6 +30,8 @@ class Observer {
 const button = (title: string) =>
 	document.querySelector<HTMLButtonElement>(`button[title="${title}"]`);
 
+const status = () => document.querySelector('[role="status"]')?.textContent;
+
 beforeEach(() => {
 	vi.clearAllMocks();
 	vi.restoreAllMocks();
@@ -116,6 +118,7 @@ test("copies the data as tab-separated text", async () => {
 	await render("c", spec);
 	button("Copy data")?.click();
 	await vi.waitFor(() => expect(button("Copied")).not.toBeNull());
+	expect(status()).toBe("Copied");
 	expect(writeText).toHaveBeenCalledWith("month\tvisits\r\nJan\t1");
 });
 
@@ -127,5 +130,6 @@ test("falls back to execCommand and shows when copying fails", async () => {
 	await render("c", spec);
 	button("Copy data")?.click();
 	await vi.waitFor(() => expect(button("Copy failed")).not.toBeNull());
+	expect(status()).toBe("Copy failed");
 	expect(document.execCommand).toHaveBeenCalledWith("copy");
 });

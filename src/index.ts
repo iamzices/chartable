@@ -92,12 +92,17 @@ export async function render(
 	}
 	const head = h("div", { className: "ct-head" });
 	if (title) head.append(h("h2", { textContent: title }));
+	const status = h("span", { className: "ct-status", role: "status" });
 	const copyButton = h("button", {
 		type: "button",
 		onclick: async () => {
 			if (await copy(toCsv(spec, "\t"))) label(copyButton, "Copied", CHECK);
 			else label(copyButton, "Copy failed", CROSS);
-			setTimeout(() => label(copyButton, "Copy data", COPY), 2000);
+			status.textContent = copyButton.title;
+			setTimeout(() => {
+				label(copyButton, "Copy data", COPY);
+				status.textContent = "";
+			}, 2000);
 		},
 	});
 	const downloadButton = h("button", {
@@ -108,6 +113,7 @@ export async function render(
 	actions.append(
 		label(copyButton, "Copy data", COPY),
 		label(downloadButton, "Download CSV", DOWNLOAD),
+		status,
 	);
 	head.append(actions);
 	const body = h("div", { className: "ct-body" });

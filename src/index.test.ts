@@ -5,7 +5,23 @@ let render: typeof import(".").render;
 
 const spec = { columns: ["month", "visits"], rows: [["Jan", 1]] };
 const chart = { ...spec, title: "Visits", kind: "bar" } as const;
-const plotly = () => ({ newPlot: vi.fn(), Plots: { resize: vi.fn() } });
+const plotly = () => ({
+	newPlot: vi.fn(),
+	purge: vi.fn(),
+	Plots: { resize: vi.fn() },
+});
+
+class Observer {
+	observe() {}
+	disconnect() {}
+}
+
+class Table {
+	on(_: string, built: () => void) {
+		built();
+	}
+	destroy() {}
+}
 
 const loadAll = () => {
 	for (const el of document.head.querySelectorAll("script, style"))
@@ -18,12 +34,7 @@ const button = (title: string) =>
 beforeEach(async () => {
 	vi.restoreAllMocks();
 	vi.unstubAllGlobals();
-	vi.stubGlobal(
-		"ResizeObserver",
-		class {
-			observe() {}
-		},
-	);
+	vi.stubGlobal("ResizeObserver", Observer);
 	vi.resetModules();
 	({ render } = await import("."));
 	document.head.replaceChildren();
@@ -59,13 +70,7 @@ test("draws a chart into a card once Plotly loads", async () => {
 
 test("draws a table with column indexes as fields", async () => {
 	const drawn = render("c", spec);
-	const Tabulator = vi.fn(
-		class {
-			on(_: string, built: () => void) {
-				built();
-			}
-		},
-	);
+	const Tabulator = vi.fn(Table);
 	vi.stubGlobal("Tabulator", Tabulator);
 	loadAll();
 	await drawn;
@@ -79,6 +84,29 @@ test("draws a table with column indexes as fields", async () => {
 			],
 		}),
 	);
+});
+
+test("removes a chart and stops resizing it", async () => {
+	const disconnect = vi.spyOn(Observer.prototype, "disconnect");
+	const drawn = render("c", chart);
+	const Plotly = plotly();
+	vi.stubGlobal("Plotly", Plotly);
+	loadAll();
+	const body = document.querySelector(".ct-body");
+	(await drawn)();
+	expect(disconnect).toHaveBeenCalled();
+	expect(Plotly.purge).toHaveBeenCalledWith(body);
+	expect(document.querySelector(".ct")).toBeNull();
+});
+
+test("removes a table", async () => {
+	const destroy = vi.spyOn(Table.prototype, "destroy");
+	const drawn = render("c", spec);
+	vi.stubGlobal("Tabulator", Table);
+	loadAll();
+	(await drawn)();
+	expect(destroy).toHaveBeenCalled();
+	expect(document.querySelector(".ct")).toBeNull();
 });
 
 test("waits for the page to load before finding the container", async () => {

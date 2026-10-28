@@ -21,11 +21,12 @@ export interface ChartableSpec {
 declare const Plotly: {
 	newPlot(el: HTMLElement, ...figure: readonly unknown[]): Promise<unknown>;
 	Plots: { resize(el: HTMLElement): void };
+	purge(el: HTMLElement): void;
 };
 declare const Tabulator: new (
 	el: HTMLElement,
 	options: object,
-) => { on(event: "tableBuilt", callback: () => void): void };
+) => { on(event: "tableBuilt", callback: () => void): void; destroy(): void };
 
 const PLOTLY =
 	"https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js";
@@ -94,13 +95,13 @@ let styled = false;
 /**
  * Appends a card with the chart or table and its copy and download buttons to
  * the container, an element or its id, filling its height or 450px without one.
- * Resolves once drawn, and throws if the container is missing or the spec has
- * no columns or rows arrays.
+ * Resolves once drawn to a function that removes the card, and throws if the
+ * container is missing or the spec has no columns or rows arrays.
  */
 export async function render(
 	container: HTMLElement | string,
 	spec: ChartableSpec,
-): Promise<void> {
+): Promise<() => void> {
 	if (
 		!Array.isArray(spec?.columns) ||
 		!Array.isArray(spec.rows) ||
@@ -169,14 +170,24 @@ export async function render(
 				placeholder: "No data",
 			});
 			await new Promise<void>((r) => table.on("tableBuilt", r));
+			return () => {
+				table.destroy();
+				card.remove();
+			};
 		} else {
 			const fig = figure(spec, kind);
 			await load(PLOTLY);
 			await Plotly.newPlot(body, ...fig);
 			// Plotly's responsive option only follows window resizes.
-			new ResizeObserver(
+			const observer = new ResizeObserver(
 				() => body.isConnected && Plotly.Plots.resize(body),
-			).observe(body);
+			);
+			observer.observe(body);
+			return () => {
+				observer.disconnect();
+				Plotly.purge(body);
+				card.remove();
+			};
 		}
 	} catch (e) {
 		body.textContent = (e as Error).message;

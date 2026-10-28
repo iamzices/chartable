@@ -51,6 +51,8 @@ render("sales", { kind: "bar", columns: ["month", "sales"], rows: [["Jan", 12], 
 
 ### `render(container, spec)`
 
+Resolves to a function that removes the card.
+
 `spec` fields:
 
 | Field     | Description                                                      |

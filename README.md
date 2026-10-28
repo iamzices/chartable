@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@iamzices/chartable)](https://www.npmjs.com/package/@iamzices/chartable)
 [![npm downloads](https://img.shields.io/npm/dm/@iamzices/chartable)](https://www.npmjs.com/package/@iamzices/chartable)
+[![jsDelivr hits](https://img.shields.io/jsdelivr/npm/hm/@iamzices/chartable)](https://www.jsdelivr.com/package/npm/@iamzices/chartable)
 [![CI](https://github.com/iamzices/chartable/actions/workflows/ci.yml/badge.svg)](https://github.com/iamzices/chartable/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/npm/l/@iamzices/chartable)](LICENSE)
 

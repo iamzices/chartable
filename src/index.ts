@@ -1,5 +1,6 @@
 import { figure } from "./chart";
 import { toCsv } from "./csv";
+import { plotly, tabulator } from "./libs";
 import { CHECK, COPY, CROSS, CSS, DOWNLOAD } from "./style";
 
 export type Cell = string | number | boolean | null;
@@ -18,46 +19,10 @@ export interface ChartableSpec {
 	rows: Cell[][];
 }
 
-declare const Plotly: {
-	newPlot(el: HTMLElement, ...figure: readonly unknown[]): Promise<unknown>;
-	Plots: { resize(el: HTMLElement): void };
-	purge(el: HTMLElement): void;
-};
-declare const Tabulator: new (
-	el: HTMLElement,
-	options: object,
-) => { on(event: "tableBuilt", callback: () => void): void; destroy(): void };
-
-const PLOTLY =
-	"https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js";
-const TABULATOR = "https://cdn.jsdelivr.net/npm/tabulator-tables@6.6.1/dist";
-
 const h = <K extends keyof HTMLElementTagNameMap>(
 	tag: K,
 	props: Partial<HTMLElementTagNameMap[K]> = {},
 ) => Object.assign(document.createElement(tag), props);
-
-const loads = new Map<string, Promise<unknown>>();
-
-function load(url: string) {
-	let loaded = loads.get(url);
-	if (!loaded) {
-		const el = url.endsWith(".css")
-			? h("style", { textContent: `@import url("${url}") layer(tabulator);` })
-			: h("script", { src: url });
-		loaded = new Promise((resolve, reject) => {
-			el.onload = resolve;
-			el.onerror = () => {
-				loads.delete(url);
-				el.remove();
-				reject(new Error(`Chartable: failed to load ${url}`));
-			};
-		});
-		document.head.append(el);
-		loads.set(url, loaded);
-	}
-	return loaded;
-}
 
 function download(spec: ChartableSpec) {
 	const url = URL.createObjectURL(
@@ -152,10 +117,7 @@ export async function render(
 
 	try {
 		if (kind === "table") {
-			await Promise.all([
-				load(`${TABULATOR}/js/tabulator.min.js`),
-				load(`${TABULATOR}/css/tabulator.min.css`),
-			]);
+			const Tabulator = await tabulator();
 			// Tabulator's inline height would override the body's default height.
 			const table = new Tabulator(body.appendChild(h("div")), {
 				// Tabulator reads dots in field names as paths, so fields are indexes.
@@ -176,7 +138,7 @@ export async function render(
 			};
 		} else {
 			const fig = figure(spec, kind);
-			await load(PLOTLY);
+			const Plotly = await plotly();
 			await Plotly.newPlot(body, ...fig);
 			// Plotly's responsive option only follows window resizes.
 			const observer = new ResizeObserver(

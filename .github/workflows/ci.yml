@@ -31,6 +31,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: npm run build
+      - name: Check the script-tag build
+        run: |
+          node -e '
+            const code = require("fs").readFileSync("dist/index.global.js", "utf8");
+            require("vm").runInThisContext(code);
+            if (typeof Chartable.render !== "function" || code.includes("import(")) process.exit(1);
+          '
 
   publish:
     if: github.event_name == 'release'

@@ -27,11 +27,11 @@ function load(src: string) {
 }
 
 export async function plotly() {
-	await load(PLOTLY);
+	if (typeof Plotly === "undefined") await load(PLOTLY);
 	return Plotly;
 }
 
 export async function tabulator() {
-	await load(TABULATOR);
+	if (typeof Tabulator === "undefined") await load(TABULATOR);
 	return Tabulator;
 }

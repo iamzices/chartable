@@ -34,6 +34,14 @@ test("loads the Tabulator version the npm build installs, once", async () => {
 	expect(await loaded).toEqual(["Tabulator", "Tabulator"]);
 });
 
+test("uses Plotly and Tabulator already on the page", async () => {
+	vi.stubGlobal("Plotly", "page Plotly");
+	vi.stubGlobal("Tabulator", "page Tabulator");
+	expect(await cdn.plotly()).toBe("page Plotly");
+	expect(await cdn.tabulator()).toBe("page Tabulator");
+	expect(script()).toBeNull();
+});
+
 test("retries a failed load", async () => {
 	const failed = cdn.plotly();
 	script()?.dispatchEvent(new Event("error"));

@@ -27,8 +27,13 @@ class Observer {
 	disconnect() {}
 }
 
-const button = (title: string) =>
-	document.querySelector<HTMLButtonElement>(`button[title="${title}"]`);
+HTMLElement.prototype.togglePopover = vi.fn();
+HTMLElement.prototype.hidePopover = vi.fn();
+
+const item = (text: string) =>
+	[...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+		(el) => el.textContent === text,
+	);
 
 const status = () => document.querySelector('[role="status"]')?.textContent;
 
@@ -116,13 +121,32 @@ test("shows errors in the card", async () => {
 	);
 });
 
+test("opens the menu at the pointer on right click", async () => {
+	await render("c", chart);
+	const e = new MouseEvent("contextmenu", {
+		bubbles: true,
+		cancelable: true,
+		clientX: 10,
+		clientY: 20,
+	});
+	document.querySelector(".ct-body")?.dispatchEvent(e);
+	const menu = document.querySelector<HTMLElement>('[role="menu"]');
+	expect(e.defaultPrevented).toBe(true);
+	expect(menu?.togglePopover).toHaveBeenCalledWith(true);
+	expect([menu?.style.left, menu?.style.top]).toEqual(["10px", "20px"]);
+	expect(document.activeElement).toBe(item("Copy"));
+	menu?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+	expect(document.activeElement).toBe(item("Download"));
+	menu?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+	expect(document.activeElement).toBe(item("Copy"));
+});
+
 test("copies the data as tab-separated text", async () => {
 	const writeText = vi.fn(async () => {});
 	vi.stubGlobal("navigator", { clipboard: { writeText } });
 	await render("c", spec);
-	button("Copy data")?.click();
-	await vi.waitFor(() => expect(button("Copied")).not.toBeNull());
-	expect(status()).toBe("Copied");
+	item("Copy")?.click();
+	await vi.waitFor(() => expect(status()).toBe("Copied"));
 	expect(writeText).toHaveBeenCalledWith("month\tvisits\r\nJan\t1");
 });
 
@@ -132,8 +156,7 @@ test("falls back to execCommand and shows when copying fails", async () => {
 	});
 	document.execCommand = vi.fn(() => false);
 	await render("c", spec);
-	button("Copy data")?.click();
-	await vi.waitFor(() => expect(button("Copy failed")).not.toBeNull());
-	expect(status()).toBe("Copy failed");
+	item("Copy")?.click();
+	await vi.waitFor(() => expect(status()).toBe("Copy failed"));
 	expect(document.execCommand).toHaveBeenCalledWith("copy");
 });

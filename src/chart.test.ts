@@ -61,10 +61,11 @@ test("uses column 0 as pie labels and column 1 as values", () => {
 	]);
 });
 
-test("applies the chart palette and removes the image button", () => {
+test("applies the chart palette, shows the legend and drops the image button", () => {
 	const [, layout, config] = figure(visitors, "line");
 	expect(layout.colorway).toEqual(CHART);
 	expect(layout.piecolorway).toEqual(CHART);
+	expect(layout.showlegend).toBe(true);
 	expect(config.modeBarButtonsToRemove).toEqual(["toImage"]);
 	expect(config.displaylogo).toBe(false);
 });

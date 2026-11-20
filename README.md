@@ -14,7 +14,7 @@ Chartable is an easy to use interactive chart and table JavaScript library built
 
 - Interactive line, area, bar, scatter and pie charts
 - Interactive tables
-- CSV export and copy to clipboard
+- CSV export and copy to clipboard from the right-click menu
 
 ## Load as a node module
 

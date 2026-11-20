@@ -10,31 +10,18 @@ const MUTED = "#f4f4f5";
 const RING = "#9f9fa9";
 export const CHART = ["#f54a00", "#009689", "#104e64", "#ffb900", "#fe9a00"];
 
-const icon = (paths: string) =>
-	`<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
-export const DOWNLOAD = icon(
-	'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
-);
-export const COPY = icon(
-	'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
-);
-export const CHECK = icon('<path d="M20 6 9 17l-5-5"/>');
-export const CROSS = icon('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
-
 // Tabulator's CSS is imported into a layer, so these unlayered rules win.
 // The card fills its container's height. Without one, the 344px body makes the
 // card 450px tall.
 export const CSS = `
 @layer tabulator{${TABULATOR}}
-.ct{box-sizing:border-box;height:100%;margin:0;display:flex;flex-direction:column;gap:24px;padding:24px;background:${BG};color:${FG};font:14px/1.5 ${FONT}}
-.ct-head{display:flex;align-items:center;gap:16px}
+.ct{position:relative;box-sizing:border-box;height:100%;margin:0;display:flex;flex-direction:column;gap:24px;padding:24px;background:${BG};color:${FG};font:14px/1.5 ${FONT}}
+.ct:focus-visible{outline:3px solid ${RING}80}
 .ct h2{margin:0;font-size:16px;font-weight:600;line-height:1}
-.ct-actions{display:flex;gap:8px;margin-left:auto}
-.ct-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.ct button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid ${BORDER};border-radius:8px;background:${BG};color:${FG};cursor:pointer;box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
-.ct button:hover{background:${MUTED}}
-.ct button:focus-visible{outline:2px solid transparent;border-color:${RING};box-shadow:0 0 0 3px ${RING}80}
-.ct button svg{width:16px;height:16px}
+.ct-status{position:absolute;top:20px;right:24px;padding:0 4px;background:${BG};color:${MUTED_FG};font-size:12px}
+.ct-menu{inset:auto;margin:0;min-width:128px;padding:4px;border:1px solid ${BORDER};border-radius:8px;background:${BG};color:${FG};box-shadow:0 4px 6px -1px rgb(0 0 0/.1),0 2px 4px -2px rgb(0 0 0/.1)}
+.ct-menu button{display:block;width:100%;padding:6px 8px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;line-height:20px;text-align:left;cursor:default;outline:0}
+.ct-menu button:hover,.ct-menu button:focus-visible{background:${MUTED}}
 .ct-body{flex:auto;height:344px;min-height:0}
 .ct .tabulator{border:0;background:none;font-size:14px}
 .ct .tabulator-header{border-bottom:1px solid ${BORDER};background:none;color:${FG};font-weight:500}

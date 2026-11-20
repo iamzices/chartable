@@ -1,7 +1,7 @@
 import { figure } from "./chart";
 import { toCsv } from "./csv";
 import { plotly, tabulator } from "./libs";
-import { CHECK, COPY, CROSS, CSS, DOWNLOAD } from "./style";
+import { CSS } from "./style";
 
 export type Cell = string | number | boolean | null;
 
@@ -52,14 +52,12 @@ async function copy(text: string) {
 	}
 }
 
-const label = (button: HTMLButtonElement, text: string, icon: string) =>
-	Object.assign(button, { title: text, ariaLabel: text, innerHTML: icon });
-
 let styled = false;
 
 /**
- * Appends a card with the chart or table and its copy and download buttons to
- * the container, an element or its id, filling its height or 450px without one.
+ * Appends a card with the chart or table and a right-click menu to copy or
+ * download its data to the container, an element or its id, filling its height
+ * or 450px without one.
  * Resolves once drawn to a function that removes the card, and throws if the
  * container is missing or the spec has no columns or rows arrays.
  */
@@ -90,35 +88,59 @@ export async function render(
 		document.head.append(h("style", { textContent: CSS }));
 		styled = true;
 	}
-	const head = h("div", { className: "ct-head" });
-	if (title) head.append(h("h2", { textContent: title }));
 	const status = h("span", { className: "ct-status", role: "status" });
-	const copyButton = h("button", {
-		type: "button",
-		onclick: async () => {
-			if (await copy(toCsv(spec, "\t"))) label(copyButton, "Copied", CHECK);
-			else label(copyButton, "Copy failed", CROSS);
-			status.textContent = copyButton.title;
+	const menu = h("div", {
+		className: "ct-menu",
+		role: "menu",
+		popover: "auto",
+	});
+	const item = (text: string, action: () => void) =>
+		h("button", {
+			type: "button",
+			role: "menuitem",
+			textContent: text,
+			onclick: () => {
+				menu.hidePopover();
+				action();
+			},
+		});
+	menu.append(
+		item("Copy", async () => {
+			status.textContent = (await copy(toCsv(spec, "\t")))
+				? "Copied"
+				: "Copy failed";
 			setTimeout(() => {
-				label(copyButton, "Copy data", COPY);
 				status.textContent = "";
 			}, 2000);
+		}),
+		item("Download", () => download(spec)),
+	);
+	menu.onkeydown = (e) => {
+		const step = e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0;
+		if (!step) return;
+		e.preventDefault();
+		const items = [...menu.children] as HTMLElement[];
+		const i = items.indexOf(document.activeElement as HTMLElement);
+		items.at((i + step) % items.length)?.focus();
+	};
+	const body = h("div", { className: "ct-body" });
+	// Focusable so keyboard users can open the menu with the context menu key.
+	const card = h("figure", {
+		className: "ct",
+		ariaLabel: title ?? null,
+		tabIndex: 0,
+		oncontextmenu: (e) => {
+			e.preventDefault();
+			menu.togglePopover(true);
+			const x = Math.min(e.clientX, innerWidth - menu.offsetWidth);
+			const y = Math.min(e.clientY, innerHeight - menu.offsetHeight);
+			menu.style.left = `${Math.max(0, x)}px`;
+			menu.style.top = `${Math.max(0, y)}px`;
+			(menu.firstChild as HTMLElement).focus();
 		},
 	});
-	const downloadButton = h("button", {
-		type: "button",
-		onclick: () => download(spec),
-	});
-	const actions = h("div", { className: "ct-actions" });
-	actions.append(
-		label(copyButton, "Copy data", COPY),
-		label(downloadButton, "Download CSV", DOWNLOAD),
-		status,
-	);
-	head.append(actions);
-	const body = h("div", { className: "ct-body" });
-	const card = h("figure", { className: "ct", ariaLabel: title ?? null });
-	card.append(head, body);
+	if (title) card.append(h("h2", { textContent: title }));
+	card.append(body, status, menu);
 	el.append(card);
 
 	try {

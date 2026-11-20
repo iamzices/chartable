@@ -50,6 +50,7 @@ export function figure({ columns, rows }: ChartableSpec, kind: string) {
 		piecolorway: CHART,
 		paper_bgcolor: "rgba(0,0,0,0)",
 		plot_bgcolor: "rgba(0,0,0,0)",
+		showlegend: true,
 		margin: { t: 8, r: 8, b: 8, l: 8, pad: 8 },
 		xaxis: { automargin: true, showgrid: false, zeroline: false },
 		yaxis: { automargin: true, gridcolor: BORDER, zeroline: false },

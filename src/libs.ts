@@ -3,3 +3,5 @@ export const plotly = async () =>
 
 export const tabulator = async () =>
 	(await import("tabulator-tables")).TabulatorFull;
+
+export const mermaid = async () => (await import("mermaid")).default;

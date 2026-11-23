@@ -34,6 +34,7 @@
 		"vitest": "^5.0.5"
 	},
 	"dependencies": {
+		"mermaid": "12.3.0",
 		"plotly.js-basic-dist-min": "2.35.2",
 		"tabulator-tables": "6.6.1"
 	}

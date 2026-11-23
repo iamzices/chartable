@@ -6,6 +6,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 const { dependencies } = JSON.parse(readFileSync("package.json", "utf8"));
 const PLOTLY = `https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@${dependencies["plotly.js-basic-dist-min"]}/plotly-basic.min.js`;
 const TABULATOR = `https://cdn.jsdelivr.net/npm/tabulator-tables@${dependencies["tabulator-tables"]}/dist/js/tabulator.min.js`;
+const MERMAID = `https://cdn.jsdelivr.net/npm/mermaid@${dependencies.mermaid}/dist/mermaid.min.js`;
 
 const sri = (path: string) =>
 	`sha384-${createHash("sha384")
@@ -47,11 +48,22 @@ test("loads the Tabulator the npm build installs once and checks it", async () =
 	expect(await loaded).toEqual(["Tabulator", "Tabulator"]);
 });
 
-test("uses Plotly and Tabulator already on the page", async () => {
+test("loads the Mermaid the npm build installs and checks it", async () => {
+	const loaded = cdn.mermaid();
+	expect(script()?.src).toBe(MERMAID);
+	expect(script()?.integrity).toBe(sri("mermaid/dist/mermaid.min.js"));
+	vi.stubGlobal("mermaid", "mermaid");
+	script()?.dispatchEvent(new Event("load"));
+	expect(await loaded).toBe("mermaid");
+});
+
+test("uses the libraries already on the page", async () => {
 	vi.stubGlobal("Plotly", "page Plotly");
 	vi.stubGlobal("Tabulator", "page Tabulator");
+	vi.stubGlobal("mermaid", "page mermaid");
 	expect(await cdn.plotly()).toBe("page Plotly");
 	expect(await cdn.tabulator()).toBe("page Tabulator");
+	expect(await cdn.mermaid()).toBe("page mermaid");
 	expect(script()).toBeNull();
 });
 

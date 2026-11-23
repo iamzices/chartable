@@ -2,7 +2,7 @@
 import { beforeEach, expect, test, vi } from "vitest";
 import { render } from ".";
 
-const { Plotly, Table, Tabulator } = vi.hoisted(() => {
+const { Mermaid, Plotly, Table, Tabulator } = vi.hoisted(() => {
 	class Table {
 		on(_: string, built: () => void) {
 			built();
@@ -14,13 +14,19 @@ const { Plotly, Table, Tabulator } = vi.hoisted(() => {
 		purge: vi.fn(),
 		Plots: { resize: vi.fn() },
 	};
-	return { Plotly, Table, Tabulator: vi.fn(Table) };
+	const Mermaid = {
+		initialize: vi.fn(),
+		render: vi.fn(async () => ({ svg: "<svg></svg>" })),
+	};
+	return { Mermaid, Plotly, Table, Tabulator: vi.fn(Table) };
 });
+vi.mock("mermaid", () => ({ default: Mermaid }));
 vi.mock("plotly.js-basic-dist-min", () => ({ default: Plotly }));
 vi.mock("tabulator-tables", () => ({ TabulatorFull: Tabulator }));
 
 const spec = { columns: ["month", "visits"], rows: [["Jan", 1]] };
 const chart = { ...spec, title: "Visits", kind: "bar" } as const;
+const diagram = { kind: "mermaid", code: "flowchart LR; A-->B" } as const;
 
 class Observer {
 	observe() {}
@@ -48,6 +54,12 @@ beforeEach(() => {
 test("rejects specs without columns and rows arrays", async () => {
 	await expect(render("c", { columns: ["a"] } as never)).rejects.toThrow(
 		"Chartable: spec needs columns and rows arrays",
+	);
+});
+
+test("rejects diagrams without code", async () => {
+	await expect(render("c", { kind: "mermaid" } as never)).rejects.toThrow(
+		"Chartable: mermaid spec needs a code string",
 	);
 });
 
@@ -84,6 +96,68 @@ test("draws a table with column indexes as fields", async () => {
 			],
 		}),
 	);
+});
+
+test("draws a diagram in strict mode", async () => {
+	await render("c", diagram);
+	expect(Mermaid.initialize).toHaveBeenCalledWith(
+		expect.objectContaining({
+			securityLevel: "strict",
+			suppressErrorRendering: true,
+		}),
+	);
+	expect(Mermaid.render).toHaveBeenCalledWith(expect.any(String), diagram.code);
+	expect(document.querySelector(".ct-body")?.innerHTML).toBe("<svg></svg>");
+});
+
+test("removes a diagram", async () => {
+	(await render("c", diagram))();
+	expect(document.querySelector(".ct")).toBeNull();
+});
+
+async function drawDiagram() {
+	Mermaid.render.mockResolvedValueOnce({
+		svg: '<svg viewBox="0 0 100 80"></svg>',
+	});
+	await render("c", diagram);
+	const body = document.querySelector(".ct-body") as HTMLElement;
+	const svg = body.firstElementChild as SVGSVGElement;
+	// A 200px square fits the diagram at 2x, letterboxed 20px top and bottom.
+	const box = () => ({ left: 0, top: 0, width: 200, height: 200 }) as DOMRect;
+	body.getBoundingClientRect = box;
+	svg.getBoundingClientRect = box;
+	return { body, svg };
+}
+
+const tool = (label: string) =>
+	document.querySelector<HTMLElement>(`[aria-label="${label}"]`);
+
+test("zooms a diagram around its center and back to fit", async () => {
+	const { body, svg } = await drawDiagram();
+	tool("Zoom in")?.click();
+	expect([svg.style.width, svg.style.height]).toEqual(["300px", "240px"]);
+	expect([body.scrollLeft, body.scrollTop]).toEqual([50, 20]);
+	tool("Zoom out")?.click();
+	expect(svg.style.width).toBe("");
+});
+
+test("zooms a diagram on Ctrl+wheel and resets it on double click", async () => {
+	const { body, svg } = await drawDiagram();
+	const wheel = (ctrlKey: boolean) => {
+		const e = new WheelEvent("wheel", {
+			ctrlKey,
+			deltaY: -100,
+			cancelable: true,
+		});
+		body.dispatchEvent(e);
+		return e.defaultPrevented;
+	};
+	expect(wheel(false)).toBe(false);
+	expect(svg.style.width).toBe("");
+	expect(wheel(true)).toBe(true);
+	expect(svg.style.width).not.toBe("");
+	svg.dispatchEvent(new MouseEvent("dblclick"));
+	expect(svg.style.width).toBe("");
 });
 
 test("removes a chart and stops resizing it", async () => {
@@ -148,6 +222,15 @@ test("copies the data as tab-separated text", async () => {
 	item("Copy")?.click();
 	await vi.waitFor(() => expect(status()).toBe("Copied"));
 	expect(writeText).toHaveBeenCalledWith("month\tvisits\r\nJan\t1");
+});
+
+test("copies a diagram's code", async () => {
+	const writeText = vi.fn(async () => {});
+	vi.stubGlobal("navigator", { clipboard: { writeText } });
+	await render("c", diagram);
+	item("Copy")?.click();
+	await vi.waitFor(() => expect(status()).toBe("Copied"));
+	expect(writeText).toHaveBeenCalledWith(diagram.code);
 });
 
 test("falls back to execCommand and shows when copying fails", async () => {

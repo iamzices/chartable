@@ -1,5 +1,9 @@
 declare const Plotly: typeof import("plotly.js-basic-dist-min").default;
 declare const Tabulator: typeof import("tabulator-tables").TabulatorFull;
+// Mermaid's global shares the name of its loader below.
+const page = globalThis as typeof globalThis & {
+	mermaid: typeof import("mermaid").default;
+};
 
 const PLOTLY = {
 	src: "https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js",
@@ -10,6 +14,11 @@ const TABULATOR = {
 	src: "https://cdn.jsdelivr.net/npm/tabulator-tables@6.6.1/dist/js/tabulator.min.js",
 	integrity:
 		"sha384-G2ks3Wc8ERwZQbUnD+D54IZmFUlgMENIYP7tgDtz5ANc7yNyu+z0+4qn7Iit8jsH",
+};
+const MERMAID = {
+	src: "https://cdn.jsdelivr.net/npm/mermaid@12.3.0/dist/mermaid.min.js",
+	integrity:
+		"sha384-HHW54r639fK42Ip0coGF3mz8oSiGn0eEoWNTLs75X7H63pLSDBa0Tqs0RwGmLlXE",
 };
 
 const loads = new Map<string, Promise<unknown>>();
@@ -44,4 +53,9 @@ export async function plotly() {
 export async function tabulator() {
 	if (typeof Tabulator === "undefined") await load(TABULATOR);
 	return Tabulator;
+}
+
+export async function mermaid() {
+	if (typeof page.mermaid === "undefined") await load(MERMAID);
+	return page.mermaid;
 }

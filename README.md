@@ -6,7 +6,7 @@
 [![CI](https://github.com/iamzices/chartable/actions/workflows/ci.yml/badge.svg)](https://github.com/iamzices/chartable/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/npm/l/@iamzices/chartable)](LICENSE)
 
-Chartable is an easy to use interactive chart and table JavaScript library built on [Plotly.js](https://plotly.com/javascript/) and [Tabulator](https://tabulator.info/).
+Chartable is an easy to use interactive chart, table and diagram JavaScript library built on [Plotly.js](https://plotly.com/javascript/), [Tabulator](https://tabulator.info/) and [Mermaid](https://mermaid.js.org/).
 
 ![A bar chart of monthly visitors next to a table of invoices](assets/preview.png)
 
@@ -14,7 +14,8 @@ Chartable is an easy to use interactive chart and table JavaScript library built
 
 - Interactive line, area, bar, scatter and pie charts
 - Interactive tables
-- CSV export and copy to clipboard from the right-click menu
+- Mermaid diagrams such as flowcharts and sequence diagrams, with zoom and pan
+- Copy and download from the right-click menu, as CSV for data or as Mermaid code and SVG for diagrams
 
 ## Load as a node module
 
@@ -45,6 +46,15 @@ render("sales", { kind: "bar", columns: ["month", "sales"], rows: [["Jan", 12], 
     ],
   });
 </script>
+
+<div id="signup"></div>
+<script>
+  Chartable.render("signup", {
+    title: "Sign-up flow",
+    kind: "mermaid",
+    code: "flowchart LR; A[Visit] --> B{Signed up?}; B -- Yes --> C[Dashboard]; B -- No --> A",
+  });
+</script>
 ```
 
 ## API
@@ -55,9 +65,10 @@ Resolves to a function that removes the card.
 
 `spec` fields:
 
-| Field     | Description                                                      |
-| --------- | ---------------------------------------------------------------- |
-| `columns` | Column names.                                                    |
-| `rows`    | Arrays of values in column order. Use `null` for an empty value. |
-| `kind`    | `"line"`, `"area"`, `"bar"`, `"scatter"`, `"pie"` or `"table"`.  |
-| `title`   | Heading.                                                         |
+| Field     | Description                                                                  |
+| --------- | ---------------------------------------------------------------------------- |
+| `columns` | Column names.                                                                |
+| `rows`    | Arrays of values in column order. Use `null` for an empty value.             |
+| `code`    | Mermaid code for `"mermaid"`, used instead of `columns` and `rows`.          |
+| `kind`    | `"line"`, `"area"`, `"bar"`, `"scatter"`, `"pie"`, `"table"` or `"mermaid"`. |
+| `title`   | Heading.                                                                     |

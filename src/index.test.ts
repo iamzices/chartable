@@ -110,6 +110,15 @@ test("draws a diagram in strict mode", async () => {
 	expect(document.querySelector(".ct-body")?.innerHTML).toBe("<svg></svg>");
 });
 
+test("downloads a diagram only once it draws", async () => {
+	await render("c", diagram);
+	expect(item("Download")).toHaveProperty("disabled", false);
+	document.body.innerHTML = '<div id="c"></div>';
+	Mermaid.render.mockRejectedValueOnce(new Error("Parse error"));
+	await expect(render("c", diagram)).rejects.toThrow("Parse error");
+	expect(item("Download")).toHaveProperty("disabled", true);
+});
+
 test("removes a diagram", async () => {
 	(await render("c", diagram))();
 	expect(document.querySelector(".ct")).toBeNull();

@@ -188,6 +188,17 @@ export async function render(
 				action();
 			},
 		});
+	const save = item("Download", () =>
+		spec.kind === "mermaid"
+			? download(`${title || "diagram"}.svg`, "image/svg+xml", svg)
+			: download(
+					`${title || "data"}.csv`,
+					"text/csv;charset=utf-8",
+					"\uFEFF",
+					toCsv(spec),
+				),
+	);
+	save.disabled = spec.kind === "mermaid";
 	menu.append(
 		item("Copy", async () => {
 			const text = spec.kind === "mermaid" ? spec.code : toCsv(spec, "\t");
@@ -196,16 +207,7 @@ export async function render(
 				status.textContent = "";
 			}, 2000);
 		}),
-		item("Download", () =>
-			spec.kind === "mermaid"
-				? download(`${title || "diagram"}.svg`, "image/svg+xml", svg)
-				: download(
-						`${title || "data"}.csv`,
-						"text/csv;charset=utf-8",
-						"\uFEFF",
-						toCsv(spec),
-					),
-		),
+		save,
 	);
 	menu.onkeydown = (e) => {
 		const step = e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0;
@@ -246,6 +248,7 @@ export async function render(
 			});
 			({ svg } = await Mermaid.render(`ct-mermaid-${++diagrams}`, spec.code));
 			body.innerHTML = svg;
+			save.disabled = false;
 			zoomable(card, body);
 			return () => card.remove();
 		} else if (kind === "table") {

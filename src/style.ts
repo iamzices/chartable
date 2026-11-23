@@ -34,7 +34,8 @@ export const CSS = `
 .ct-status{position:absolute;top:20px;right:24px;padding:0 4px;background:${BG};color:${MUTED_FG};font-size:12px}
 .ct-menu{inset:auto;margin:0;min-width:128px;padding:4px;border:1px solid ${BORDER};border-radius:8px;background:${BG};color:${FG};box-shadow:0 4px 6px -1px rgb(0 0 0/.1),0 2px 4px -2px rgb(0 0 0/.1)}
 .ct-menu button{display:block;width:100%;padding:6px 8px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;line-height:20px;text-align:left;cursor:default;outline:0}
-.ct-menu button:hover,.ct-menu button:focus-visible{background:${MUTED}}
+.ct-menu button:enabled:hover,.ct-menu button:focus-visible{background:${MUTED}}
+.ct-menu button:disabled{color:${MUTED_FG}}
 .ct-body{flex:auto;height:344px;min-height:0}
 .ct-body:has(>svg){display:flex;overflow:auto}
 .ct-body>svg{flex:none;height:100%;margin:auto;user-select:none}
